@@ -1,0 +1,28 @@
+---
+
+  # Nginx Configuration
+   - name: Create document root
+     file:
+       path: "/var/www/{{ http_host }}"
+       state: directory
+       owner: "www-data"
+       group: "www-data"
+       mode: '0755'
+
+   - name: Sets Nginx conf file
+     template:
+       src: "../files/nginx.conf"
+       dest: "/etc/nginx/sites-available/{{ http_conf_n }}"
+
+   - name: Enables new site
+     file:
+       src: "/etc/nginx/sites-available/{{ http_conf_n }}"
+       dest: "/etc/nginx/sites-enabled/{{ http_conf_n }}"
+       state: link
+     notify: Reload Nginx
+
+   - name: Removes "default" site
+     file:
+       path: "/etc/nginx/sites-enabled/default"
+       state: absent
+     notify: Reload Nginx

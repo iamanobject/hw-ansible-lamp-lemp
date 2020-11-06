@@ -1,0 +1,7 @@
+[LAMP]
+
+hw_s1  ansible_host=34.89.160.137
+
+[LEMP]
+
+hw_s2  ansible_host=34.107.38.206

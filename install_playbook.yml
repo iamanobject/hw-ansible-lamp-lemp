@@ -1,0 +1,65 @@
+---
+- hosts: LAMP
+  become: true
+  vars_files:
+    - roles/vars/default.yml
+
+  tasks:
+   - name: Install prerequisites
+     apt: name=aptitude update_cache=yes state=latest force_apt_get=yes
+     tags: [ system ]
+
+   - name: Install LAMP Packages
+     apt: name={{ item }} update_cache=yes state=latest
+     loop: [ 'apache2', 'mysql-server', 'python3-pymysql', 'php', 'php-mysql', 'libapache2-mod-php' ]
+     tags: [ system ]
+
+   - name: Install PHP Extensions
+     apt: name={{ item }} update_cache=yes state=latest
+     loop: "{{ php_modules }}"
+     tags: [ system ]
+
+   - include_tasks: roles/tasks/apache.yml
+   - include_tasks: roles/tasks/msql.yml
+   - include_tasks: roles/tasks/wp.yml
+
+  handlers:
+   - name: Reload Apache
+     service:
+       name: apache2
+       state: reloaded
+
+   - name: Restart Apache
+     service:
+       name: apache2
+       state: restarted
+
+
+- hosts: LEMP
+  become: true
+  vars_files:
+   - roles/vars/default.yml
+
+  tasks:
+   - name: Install Prerequisites
+     apt: name={{ item }} update_cache=yes state=latest force_apt_get=yes
+     loop: [ 'aptitude' ]
+
+   - name: Install LEMP Packages
+     apt: name={{ item }} update_cache=yes state=latest
+     loop: [ 'nginx', 'mysql-server', 'python3-pymysql', 'php-fpm', 'php-mysql' ]
+
+   - include_tasks: roles/tasks/nginx.yml
+   - include_tasks: roles/tasks/msql.yml
+   - include_tasks: roles/tasks/wp.yml
+
+  handlers:
+   - name: Reload Nginx
+     service:
+       name: nginx
+       state: reloaded
+
+   - name: Restart Nginx
+     service:
+       name: nginx
+       state: restarted
